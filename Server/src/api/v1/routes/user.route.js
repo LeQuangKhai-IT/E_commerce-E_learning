@@ -2,13 +2,17 @@
 
 const express = require('express');
 const route = express.Router();
-const jwt = require('../middlewares/jwt_service');
-const userController = require('../controllers/userController');
+const jwt = require('../middlewares/auth.middleware');
+const userController = require('../controllers/user.controller');
 
-route.get('/getUsers', jwt.verifyAccessToken, jwt.authorize('admin'), userController.getUsers);
-route.get('/getUser:', jwt.verifyAccessToken, userController.getUser);
-route.post('/createUser', jwt.verifyAccessToken, jwt.authorize('admin'), userController.createUser);
-route.put('/updateUser', jwt.verifyAccessToken, userController.updateUser);
-route.delete('/deleteUser', jwt.verifyAccessToken, jwt.authorize('admin'), userController.deleteUser);
+route.get('/all', jwt.verifyAccessToken, jwt.authorize('admin'), userController.getUsers);
+
+route.get('/:id', jwt.verifyAccessToken, userController.getUser);
+
+route.post('/', jwt.verifyAccessToken, jwt.authorize('admin'), userController.createUser);
+
+route.patch('/:id', jwt.verifyAccessToken, userController.updateUser);
+
+route.delete('/:id', jwt.verifyAccessToken, jwt.authorize('admin'), userController.deleteUser);
 
 module.exports = route;

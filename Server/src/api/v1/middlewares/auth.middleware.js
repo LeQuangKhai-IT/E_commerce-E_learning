@@ -80,7 +80,7 @@ const verifyRefreshToken = async (refreshToken) => {
 
 const authorize = (permissions) => {
     return async (req, res, next) => {
-        const { _id } = req.body;
+        const _id = req.body._id;
         if (!_id) {
             return res.status(403).json('You need sign in!');
         }
