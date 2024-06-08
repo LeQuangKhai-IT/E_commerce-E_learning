@@ -2,6 +2,7 @@
 
 const express = require('express');
 const app = express();
+const cors = require('cors')
 const helmet = require('helmet');
 const bodyParser = require('body-parser');
 const createHttpError = require('http-errors');
@@ -13,9 +14,14 @@ const isProduction = process.env.NODE_ENV === "production";
 
 const authRoute = require('../api/v1/routes/auth.route');
 const userRoute = require('../api/v1/routes/user.route');
-const accessLogStream = require('../api/v1/stream_logs');
+const accessLogStream = require('../api/v1/logs/stream_logs');
+const error = require('../api/v1/utils/handleError');
 
-
+app.use(cors({
+    origin:'http://localhost:3000',
+    credentials:true,
+}
+))
 app.use(helmet());
 app.use(express.json());
 app.use(bodyParser.json());
@@ -29,13 +35,7 @@ app.use((req, res, next) => {
     next(createHttpError.NotFound('This route is not exit'));
 });
 
-app.use((err, req, res, next) => {
-    res.json({
-        status: err.status || 500,
-        message: err.message
-    })
-}
-);
+app.use(error.handleError);
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

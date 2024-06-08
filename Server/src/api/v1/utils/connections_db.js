@@ -9,7 +9,7 @@ const newConnection = (uri, dbName) => {
     });
 
     conn.on('connected', () => {
-        console.log(`Mongodb connected database ${conn.name}`);
+        // console.log(`Mongodb connected database ${conn.name}`);
     });
 
     conn.on('disconnected', () => {

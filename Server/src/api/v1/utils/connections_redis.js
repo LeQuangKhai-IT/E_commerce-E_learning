@@ -14,11 +14,12 @@ client.on("error", function (error) {
 });
 
 client.on("connect", function (error) {
-    console.log(`Connected to ${databaseConfig.redis.namedb}`);
+    //console.log(`Connected to ${databaseConfig.redis.namedb}`);
+
 });
 
 client.on("ready", function (error) {
-    console.log(`${databaseConfig.redis.namedb} is ready!`);
+    //console.log(`${databaseConfig.redis.namedb} is ready!`);
 });
 
 client.on('end', () => {
@@ -29,10 +30,5 @@ process.on('SIGINT', () => {
     client.quit();
 });
 
-client.connect().then(() => {
-    console.log('Connected to Redis');
-}).catch((err) => {
-    console.log(err.message);
-});
 
 module.exports = client;

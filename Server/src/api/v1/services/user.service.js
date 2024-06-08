@@ -12,7 +12,8 @@ const getUser = async (req) => {
 }
 const createUser = async (req) => {
     const { email } = req.body;
-    const { error } = valid.userValidate(req.body);
+    const { _id, ...data } = req.body;
+    const { error } = valid.userValidate(data);
     if (error) {
         throw createHttpError(error.details[0].message);
     };
@@ -20,9 +21,8 @@ const createUser = async (req) => {
         email
     });
     if (isExits) {
-        throw createHttpError.Conflict(`User ${req.body._id} is exits!`);
+        throw createHttpError.Conflict(`User ${email} is exits!`);
     }
-    const { _id, ...data } = req.body;
     const userModel = new User(data);
     const userSave = await userModel.save();
     return userSave;
