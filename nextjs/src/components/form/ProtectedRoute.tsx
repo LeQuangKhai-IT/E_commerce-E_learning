@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { useAppSelector } from "@/hooks/redux";
+import { useAppSelector } from "@/hooks/useRedux";
 import { useRouter } from "next/navigation";
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({

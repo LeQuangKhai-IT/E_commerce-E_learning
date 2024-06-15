@@ -20,22 +20,24 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <StoreProvider>
-      <html lang="en">
-        <body className={inter.className} suppressHydrationWarning={true}>
-          <Toaster />
-          <header style={{ backgroundColor: "lightblue", padding: "1 rem" }}>
-            <Header />
-          </header>
-          <nav style={{ backgroundColor: "lightgreen", padding: "1 rem" }}>
-            <Navbar />
-          </nav>
-          {children}
-          <footer style={{ backgroundColor: "lightgray", padding: "1 rem" }}>
-            <Footer />
-          </footer>
-        </body>
-      </html>
-    </StoreProvider>
+    <html lang="en">
+      <body className={inter.className} suppressHydrationWarning={true}>
+        <StoreProvider>
+          <div className="relative">
+            <Toaster />
+            <header>
+              <Header />
+            </header>
+            <nav className="sticky top-0 z-10">
+              <Navbar />
+            </nav>
+            {children}
+            <footer>
+              <Footer />
+            </footer>
+          </div>
+        </StoreProvider>
+      </body>
+    </html>
   );
 }

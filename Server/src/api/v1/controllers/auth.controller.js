@@ -18,6 +18,7 @@ const refreshToken = async (req, res, next) => {
     next(error);
   }
 };
+
 const login = async (req, res, next) => {
   try {
     const data = await authService.login(req);
@@ -26,6 +27,25 @@ const login = async (req, res, next) => {
     next(error);
   }
 };
+
+const passwordToken = async (req, res, next) => {
+  try {
+    const data = await authService.passwordToken(req);
+    res.json(data);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const resetPassword = async (req, res, next) => {
+  try {
+    const data = await authService.resetPassword(req);
+    res.json(data);
+  } catch (error) {
+    next(error);
+  }
+};
+
 const logout = async (req, res, next) => {
   try {
     await authService.logout(req);
@@ -41,5 +61,7 @@ module.exports = {
   register,
   refreshToken,
   login,
+  resetPassword,
+  passwordToken,
   logout,
 };

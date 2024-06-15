@@ -6,7 +6,14 @@ interface AuthState {
   refreshToken: string | null;
   msg: string | null;
   statusCode: number | null;
-  message: string | null;
+  _id: string | null;
+  email: string | null;
+  fname: string | null;
+  lname: string | null;
+  avatar: string | null;
+  headline: string | null;
+  role: "admin" | "author" | "number";
+  website: string | null;
   status: "idle" | "loading" | "succeeded" | "failed";
   error: string | null;
 }
@@ -16,20 +23,27 @@ const initialState: AuthState = {
   msg: null,
   refreshToken: null,
   statusCode: null,
-  message: null,
+  _id: null,
+  email: null,
+  fname: null,
+  lname: null,
+  avatar: null,
+  headline: null,
+  role: "number",
+  website: null,
   status: "idle",
   error: null,
 };
 
 export const login = createAsyncThunk(
-  "http://localhost:3000/login",
+  `${process.env.CLIENT_URL}/sign-in`,
   async (
     credentials: { email: string; password: string },
     { rejectWithValue }
   ) => {
     try {
       const response = await axios.post(
-        "http://127.0.0.1:6621/api/v1/auth/login",
+        `${process.env.SERVER_URL}/auth/login`,
         credentials
       );
       return response.data;
@@ -40,19 +54,19 @@ export const login = createAsyncThunk(
 );
 
 export const register = createAsyncThunk(
-  "http://localhost:3000/register",
+  `${process.env.CLIENT_URL}/sign-up`,
   async (
     informations: {
       email: string;
       password: string;
-      firstname: string;
-      lastname: string;
+      fname: string;
+      lname: string;
     },
     { rejectWithValue }
   ) => {
     try {
       const response = await axios.post(
-        "http://127.0.0.1:6621/api/v1/auth/register",
+        `${process.env.SERVER_URL}/auth/register`,
         informations
       );
       return response.data;
@@ -67,8 +81,41 @@ export const refreshAccessToken = createAsyncThunk(
   async (refreshToken: string, { rejectWithValue }) => {
     try {
       const response = await axios.post(
-        "http://127.0.0.1:6621/api/v1/auth/refresh-token",
+        `${process.env.SERVER_URL}/auth/refresh-token`,
         { token: refreshToken }
+      );
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const forgotPassword = createAsyncThunk(
+  `${process.env.CLIENT_URL}/forgot-assword`,
+  async (email: string, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(
+        `${process.env.SERVER_URL}/auth/password-reset`,
+        { email: email }
+      );
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const resetPassword = createAsyncThunk(
+  `${process.env.CLIENT_URL}/reset-pssword`,
+  async (
+    informations: { code: string; password: string },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await axios.post(
+        `${process.env.SERVER_URL}/auth/password-reset/${informations.code}`,
+        { password: informations.password }
       );
       return response.data;
     } catch (error: any) {
@@ -95,10 +142,35 @@ const authSlice = createSlice({
       .addCase(login.fulfilled, (state, action) => {
         state.status = "succeeded";
         state.msg = action.payload.msg;
-        state.accessToken = action.payload.accessToken;
-        state.refreshToken = action.payload.refreshToken;
-        state.statusCode = action.payload.status;
-        state.message = action.payload.message;
+        state.accessToken = action.payload.accessToken
+          ? action.payload.accessToken
+          : null;
+        state.refreshToken = action.payload.refreshToken
+          ? action.payload.refreshToken
+          : null;
+        state.statusCode = action.payload.status ? action.payload.status : null;
+        state._id = action.payload.account ? action.payload.account._id : null;
+        state.email = action.payload.account
+          ? action.payload.account.email
+          : null;
+        state.fname = action.payload.account
+          ? action.payload.account.fname
+          : null;
+        state.lname = action.payload.account
+          ? action.payload.account.lname
+          : null;
+        state.headline = action.payload.account
+          ? action.payload.account.headline
+          : null;
+        state.avatar = action.payload.account
+          ? action.payload.account.avatar
+          : null;
+        state.website = action.payload.account
+          ? action.payload.account.website
+          : null;
+        state.role = action.payload.account
+          ? action.payload.account.role
+          : null;
       })
       .addCase(login.rejected, (state, action: any) => {
         state.status = "failed";
@@ -109,10 +181,43 @@ const authSlice = createSlice({
       })
       .addCase(register.fulfilled, (state, action) => {
         state.status = "succeeded";
-        state.statusCode = action.payload.status;
-        state.message = action.payload.message;
+        state.statusCode = action.payload.status ? action.payload.status : null;
+        state._id = action.payload.account ? action.payload.account._id : null;
+        state.email = action.payload.account
+          ? action.payload.account.email
+          : null;
+        state.fname = action.payload.account
+          ? action.payload.account.fname
+          : null;
+        state.lname = action.payload.account
+          ? action.payload.account.lname
+          : null;
+        state.headline = action.payload.account
+          ? action.payload.account.headline
+          : null;
+        state.avatar = action.payload.account
+          ? action.payload.account.avatar
+          : null;
+        state.website = action.payload.account
+          ? action.payload.account.website
+          : null;
+        state.role = action.payload.account
+          ? action.payload.account.role
+          : null;
       })
       .addCase(register.rejected, (state, action: any) => {
+        state.status = "failed";
+        state.error = action.error.message;
+      })
+      .addCase(forgotPassword.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(forgotPassword.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.statusCode = action.payload.status ? action.payload.status : null;
+        state.msg = action.payload.msg;
+      })
+      .addCase(forgotPassword.rejected, (state, action: any) => {
         state.status = "failed";
         state.error = action.error.message;
       })

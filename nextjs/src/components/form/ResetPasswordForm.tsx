@@ -4,34 +4,29 @@ import { useRouter } from "next/navigation";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { IconContext } from "react-icons";
 import { toast } from "sonner";
-import Link from "next/link";
 import { useAppDispatch, useAppSelector } from "@/hooks/useRedux";
-import { login } from "@/redux/auth/authSlice";
+import { resetPassword } from "@/redux/auth/authSlice";
 
 interface Errors {
-  email?: string;
+  code?: string;
   password?: string;
 }
 
-const LoginForm = () => {
-  const [email, setEmail] = useState<string>("");
+const ResetPasswordForm = () => {
+  const [code, setCode] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [errors, setErrors] = useState<Errors>({});
   const { status } = useAppSelector((state) => state.auth);
-  const [rememberMe, setRememberMe] = useState<boolean>(false);
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const [errorMesage, setErrorMessage] = useState<string>(
-    "Email or password is incorrect!"
-  );
 
   const validate = (): boolean => {
     let tempErrors: Errors = {};
-    if (!email) {
-      tempErrors.email = "Email is required.";
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      tempErrors.email = "Email is invalid.";
+    if (!code) {
+      tempErrors.code = "Code is required.";
+    } else if (!/[a-z0-9/]/g.test(code)) {
+      tempErrors.code = "Code is invalid.";
     }
     if (!password) {
       tempErrors.password = "Password is required.";
@@ -45,32 +40,21 @@ const LoginForm = () => {
     return Object.values(tempErrors).every((x) => x === "");
   };
 
-  const handleRemember = (): any => {
-    if (rememberMe) {
-      localStorage.removeItem("email");
-      localStorage.removeItem("password");
-      setRememberMe(!rememberMe);
-    } else {
-      localStorage.setItem("email", email);
-      localStorage.setItem("password", password);
-      setRememberMe(!rememberMe);
-    }
-  };
-  const handleLogin = async () => {
+  const handleSubmit = async () => {
+    let tempErrors: { [key: string]: string } = {};
     if (validate()) {
       try {
-        const result = await dispatch(login({ email, password }));
-        if (result.payload.status === 404) {
-          setErrors({ email: errorMesage, password: errorMesage });
-        } else if (result.payload.status === 401) {
-          setErrors({ email: errorMesage, password: errorMesage });
+        const result = await dispatch(resetPassword({ code, password }));
+        if (result.payload.status === 500) {
+          tempErrors.code = result.payload.message ?? " ";
+          setErrors(tempErrors);
         } else {
           toast.success(result.payload.msg, {
             duration: 2000,
             position: "top-right",
             style: { backgroundColor: "green", color: "white" },
           });
-          router.push("/");
+          router.push("sign-in");
         }
       } catch (err) {
         console.error(err);
@@ -81,23 +65,24 @@ const LoginForm = () => {
   return (
     <form>
       <div className="mb-2">
-        <label htmlFor="email" className="block text-gray-700">
-          Email
-        </label>
+        <div className="bg-green-200 p-2 rounded-lg">
+          Please check code we are submited for your email and part on input
+          Code to update new password !
+        </div>
+        <label className="block text-gray-700">Code</label>
         <input
-          type="email"
-          id="email"
+          type="text"
           className={`mt-1 block w-full px-3 py-2 border ${
             errors ? "border-red-500" : "border-gray-300"
           } rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
-          value={email}
+          value={code}
           onChange={(e: ChangeEvent<HTMLInputElement>) =>
-            setEmail(e.target.value)
+            setCode(e.target.value)
           }
           required
         />
-        {errors ? (
-          <span className="text-red-500 text-sm">{errors.email}</span>
+        {errors.code ? (
+          <span className="text-red-500 text-sm">{errors.code}</span>
         ) : (
           <span className="text-red text-sm invisible">hide</span>
         )}
@@ -133,29 +118,16 @@ const LoginForm = () => {
           <span className="text-red text-sm invisible">hide</span>
         )}
       </div>
-      <div className="flex items-center justify-between mb-4">
-        <label className="flex items-center text-gray-700">
-          <input
-            type="checkbox"
-            checked={rememberMe}
-            onChange={() => handleRemember()}
-            className="mr-2"
-          />
-          Remember Me
-        </label>
-        <Link href="forgot-password" className="text-blue-500 hover:underline">
-          Forgot Password?
-        </Link>
-      </div>
+
       <button
-        onClick={handleLogin}
+        onClick={handleSubmit}
         type="button"
         className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50"
       >
-        {status && status === "loading" ? `login...` : "login"}
+        {status && status === "loading" ? `Submit...` : "Submit"}
       </button>
     </form>
   );
 };
 
-export default LoginForm;
+export default ResetPasswordForm;

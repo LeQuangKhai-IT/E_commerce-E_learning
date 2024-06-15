@@ -1,6 +1,6 @@
 "use client";
 import axios from "axios";
-import { useAppSelector, useAppDispatch } from "@/redux/auth/hooks";
+import { useAppSelector, useAppDispatch } from "@/hooks/useRedux";
 import { refreshAccessToken, logout } from "@/redux/auth/authSlice";
 
 const api = axios.create({

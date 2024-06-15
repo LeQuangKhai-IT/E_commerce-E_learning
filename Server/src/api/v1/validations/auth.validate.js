@@ -19,6 +19,29 @@ const loginValidate = (data) => {
   return userSchema.validate(data);
 };
 
+const emailValidate = (data) => {
+  const userSchema = joi.object({
+    email: joi
+      .string()
+      .min(10)
+      .max(32)
+      .email({ minDomainSegments: 2, tlds: { allow: ["com"] } })
+      .lowercase()
+      .required(),
+  });
+  return userSchema.validate(data);
+};
+
+const passwordValidate = (data) => {
+  const userSchema = joi.object({
+    password: joi
+      .string()
+      .pattern(new RegExp("^[a-zA-Z0-9]{6,32}$"))
+      .required(),
+  });
+  return userSchema.validate(data);
+};
+
 const registerValidate = (data) => {
   const userSchema = joi.object({
     email: joi
@@ -41,4 +64,6 @@ const registerValidate = (data) => {
 module.exports = {
   loginValidate,
   registerValidate,
+  emailValidate,
+  passwordValidate,
 };
